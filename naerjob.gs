@@ -30,29 +30,34 @@ function scrapeNaerAndWriteToSheet() {
 
   var token = "你的權杖";
 
-  // 遍歷提取的數據
+var messages = []; // 存储所有待发送的消息
+
+  // 遍历提取的数据
   for (var i = 0; i < dates.length; i++) {
-    // 格式化日期，僅顯示日期而不顯示時間
+    // 格式化日期，仅显示日期而不显示时间
     var formattedDate = Utilities.formatDate(new Date(dates[i]), "GMT+8", "yyyy-MM-dd");
 
-    // 檢查日期是否在過去的15天內
+    // 检查日期是否在过去的15天内
     if (isWithinLastNDays(new Date(dates[i]), 15)) {
-      // 處理數值
+      // 处理数据
       var processedDate = "日期：" + formattedDate;
       var processedUnit = "單位：" + units[i];
       var processedInfo = "徵才資訊：" + titles[i];
       var processedLinks = "連結：" + links[i];
 
-      // 發送 LINE 通知
+      // 构建消息
       var message = "\n" + processedDate + "\n" + processedUnit + "\n" + processedInfo + "\n" + processedLinks;
-      sendline(message, token);
+      messages.push(message); // 将消息添加到待发送消息列表
 
-      // 將數據寫入工作表，僅當標題尚未存在時
+      // 将数据写入工作表，仅当标题尚未存在时
       if (!isTitleAlreadyPresent(sheet, titles[i])) {
         sheet.appendRow([formattedDate, units[i], titles[i], links[i]]);
       }
     }
   }
+
+  // 发送所有待发送的消息
+  sendline(messages.join("\n"), token);
 }
 
 function isWithinLastNDays(date, n) {
